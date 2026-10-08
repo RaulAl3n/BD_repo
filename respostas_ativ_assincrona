@@ -1,0 +1,127 @@
+Parte I:
+Minha resposta: A integridade dos dados num banco de dados é garantida fazendo com que os dados que persistem no banco sejam confiáveis, precisos e
+                válidos, de forma que haja meios (ou constraints) que assegurem que todo dado inserido no banco tenha o tipo correto esperado pela
+                tabela, cada registro tenha seu próprio id único e não nulo (evita duplicidade) e por último, tenha Foreign Keys, caso seja preciso,
+                para evitar registros órfãos e possibilitar o uso de relações entre as entidades.
+
+B. Integridade de entidade
+
+    Minha resposta: A integridade de entidade procura garantir a consistência e unicidade das linhas de uma tabela, de forma que seja impossível haver
+                    linhas duplicadas. A relação entre o conceito e chave primária é que a chave é um requisito essencial para a integridade, já que é
+                    necessário dela para impossibilitar a duplicação de linhas em uma tabela. A chave primária NUNCA deve possuir valores repetidos, e
+                    nunca deve ser nula. Se essas regras não fossem respeitadas, iríamos com certeza ver bancos na qual as tabelas possuem tabelas du-
+                    plicadas e há uma desorganização geral nas tabelas, por não ser possível identificar os registros de forma eficiente.
+
+                    Exemplo próprio:
+                    Numa locadora de carros na qual o banco de dados não segue o princípio da integridade de entidade, é possível ver a repetição de di-
+                    versas linhas dentro das tabelas, já que há diversos carros com o mesmo modelo registrados na tabela 'veiculo'. Além disso, a busca
+                    dura o triplo do tempo, pois o conceito de ID não foi aplicado corretamente, e há vários IDs nulos e repetidos nos registros da
+                    tabela.
+
+                    A solução para esse problema seria refazer o banco, e utilizar IDs únicos e não nulos no registro de cada novo carro que fosse 
+                    inserido.
+
+C. Integridade referencial
+
+    Minha resposta: A integridade referencial garante que as referências entre tabelas sejam sempre válidas, ou seja, uma FK só pode 
+                    apontar para um registro que realmente existe na tabela referenciada. Uma FK não pode referenciar um registro inexistente, e quando 
+                    isso acontece (por falha ou ausência da regra) o registro fica "órfão", apontando para algo que não existe mais. Ao excluir um regis-
+                    tro referenciado, o banco pode bloquear a exclusão (RESTRICT), apagar os filhos junto (CASCADE) ou zerar a FK (SET NULL), dependendo 
+                    da regra configurada.
+
+                    Exemplo próprio:
+                    Nas tabelas 'Setor' e 'Ativo', o campo 'id_setor' em Ativo é uma FK que referencia 'id_setor' em Setor. Assim, não é possível cadastrar
+                    um ativo com um setor que não existe. Se o setor "Servidores" for excluído com ON DELETE CASCADE, todos os ativos dele são excluídos
+                    junto, evitando ativos órfãos apontando para um setor inexistente.
+
+D. Integridade de domínio
+
+    Minha resposta: O domínio de um atributo é o conjunto de valores válidos que ele pode assumir, como a severidade de um evento só poder ser Baixa,
+                    Média, Alta ou Crítica. Determinamos os valores válidos definindo tipo, tamanho, faixa, formato ou um conjunto fixo de opções para
+                    o atributo. O tipo de dado ajuda, pois já impede, por exemplo, texto num campo numérico, mas sozinho não garante o significado do
+                    valor. Por isso existem restrições além do tipo, como CHECK, NOT NULL e UNIQUE, que validam regras do negócio (ex: tentativas >= 0).
+
+Parte II:
+
+1. Problema encontrado(tabela CLIENTE): email 'ana@email.com' aparece nos Clientes 1 e 5.
+   Por que é um problema? Dois registros possuem o mesmo email.
+   Tipo de integridade: Entidade
+   Regra que deveria existir: email possuir um constraint que garanta unicidade de cada email em seu devido registro.
+   
+2. Problema encontrado(tabela CLIENTE): nome do Cliente 4 esta vazio.
+   Por que é um problema? Esta faltando dados no registro, fugindo do dominio.
+   Tipo de integridade: Dominio
+   Regra que deveria existir: constraint que garante a regra de proibir a insercao de um tipo invalido.
+
+3. Problema encontrado(tabela CLIENTE): Cliente 2 aparece duas vezes
+   Por que é um problema? Dois registros possuem o mesmo identificador
+   Tipo de integridade: Entidade
+   Regra que deveria existir: idCliente não pode se repetir.
+
+4. Problema encontrado(tabela PRODUTO): nome do Produto 13 esta vazio.
+   Por que é um problema? Nao e possivel mostrar o nome do produto no frontend, pois ele nao esta registrado.
+   Tipo de integridade: Dominio
+   Regra que deveria existir: constraint que garante a regra de proibir a insercao de um tipo invalido.
+
+5. Problema encontrado(tabela PRODUTO): preço do Produto 11 é negativo.
+   Por que é um problema? Preço não pode assumir valores negativos, foge do domínio esperado.
+   Tipo de integridade: Domínio
+   Regra que deveria existir: CHECK (preco >= 0) na coluna preço.
+
+6. Problema encontrado(tabela PRODUTO): estoque do Produto 12 é negativo.
+   Por que é um problema? Estoque não pode ser negativo, foge do domínio esperado.
+   Tipo de integridade: Domínio
+   Regra que deveria existir: CHECK (estoque >= 0) na coluna estoque.
+
+7. Problema encontrado(tabela PEDIDO): idCliente 99 do Pedido 102 não existe na tabela CLIENTE.
+   Por que é um problema? A FK aponta para um registro inexistente, criando um pedido órfão.
+   Tipo de integridade: Referencial
+   Regra que deveria existir: FOREIGN KEY (idCliente) REFERENCES CLIENTE(idCliente).
+
+8. Problema encontrado(tabela PEDIDO): valor do Pedido 101 é negativo.
+   Por que é um problema? Valor não pode ser negativo, foge do domínio esperado.
+   Tipo de integridade: Domínio
+   Regra que deveria existir: CHECK (valor >= 0) na coluna valor.
+
+Parte III:
+
+[E] R01 — Todo cliente deve possuir um identificador único e nao nulo.
+[E] R02 — Todo email de cliente deve ser único.
+[D] R03 — Todo nome de cliente deve ser nao nulo, dentro do numero de caracteres maximo, e somente feito de letras.
+[E] R04 — Todo produto deve possuir um identificador único.
+[D] R05 — Todo produto deve possuir um preco maior ou igual a zero.
+[D] R06 — Todo produto deve possuir um estoque maior ou igual a zero.
+[D] R07 — Todo nome de produto deve ser nao nulo, dentro do numero de caracteres maximo, e somente feito de letras.
+[E] R08 — Todo pedido deve possuir um identificador único e nao nulo.
+[D] R09 — Todo pedido deve possuir uma data valida.
+[D] R10 — Todo pedido deve possuir um valor maior ou igual a zero.
+[R] R11 — Um pedido somente poderá referenciar um cliente existente.
+
+Parte IV:
+
+PRIMARY KEY: Garante que cada linha da tabela tenha um identificador único e não nulo, impedindo registros duplicados ou sem identificação.
+             Útil para identificar unicamente cada cliente de um sistema, por exemplo idCliente na tabela CLIENTE.
+
+FOREIGN KEY: Garante a integridade referencial, assegurando que um valor em uma tabela corresponda a um registro existente em outra tabela.
+             Útil para garantir que todo pedido feito na tabela PEDIDO esteja associado a um cliente que realmente existe na tabela CLIENTE.
+
+NOT NULL: Garante que um campo sempre tenha um valor preenchido, impedindo a ausência de dados obrigatórios.
+          Útil para garantir que o campo nome de um produto nunca fique vazio no cadastro.
+
+UNIQUE: Garante que não existam valores repetidos numa coluna, mesmo que ela não seja a chave primária.
+        Útil para garantir que dois clientes não se cadastrem com o mesmo e-mail.
+
+CHECK: Garante que o valor inserido numa coluna respeite uma condição lógica definida, mantendo-o dentro do domínio esperado.
+       Útil para impedir que o preço de um produto ou o estoque sejam armazenados com valores negativos.
+
+DEFAULT: Garante que, quando nenhum valor é informado, a coluna receba um valor padrão predefinido, em vez de ficar nula.
+         Útil para definir que o campo estoque de um novo produto comece automaticamente em 0 caso não seja informado.
+
+Parte V:
+
+Identificar cada cliente de maneira única: PRIMARY KEY
+Impedir um cliente sem nome: NOT NULL
+Impedir dois clientes com o mesmo e-mail: UNIQUE
+Impedir preço negativo: CHECK
+Garantir que um pedido pertença a um cliente existente: FOREIGN KEY
+Fazer um produto iniciar com estoque zero quando nenhum valor for informado: DEFAULT
