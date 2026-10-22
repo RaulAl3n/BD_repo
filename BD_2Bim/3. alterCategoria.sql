@@ -1,0 +1,2 @@
+ALTER TABLE categoria
+  ADD ativo BOOLEAN DEFAULT TRUE
